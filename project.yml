@@ -1,0 +1,96 @@
+name: Subtext
+options:
+  bundleIdPrefix: com.utkarsh
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+targets:
+  Subtext:
+    type: application
+    platform: iOS
+    sources:
+      - Subtext
+      - Shared
+    info:
+      path: Subtext/Info.plist
+      properties:
+        CFBundleDisplayName: Subtext
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLName: com.utkarsh.subtext
+            CFBundleURLSchemes: [subtext]
+        ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
+        UIBackgroundModes:
+          - audio
+        NSMicrophoneUsageDescription: Subtext listens through the microphone to tell when people are talking and keep the subtitles in step; nothing can be played back and nothing leaves the phone. The microphone stays on for the whole session, including while the film is paused and while Subtext is only checking the room every few minutes, because iOS does not let an app re-open it from the background.
+        NSSpeechRecognitionUsageDescription: Subtext recognises a few spoken words on this phone to find where you are in the subtitles. Nothing is sent anywhere.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Subtitle file
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.plain-text
+              - public.text
+              - com.utkarsh.subtext.srt
+              - com.utkarsh.subtext.vtt
+              - com.utkarsh.subtext.ass
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.utkarsh.subtext.srt
+            UTTypeDescription: SubRip subtitles
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification: { public.filename-extension: [srt] }
+          - UTTypeIdentifier: com.utkarsh.subtext.vtt
+            UTTypeDescription: WebVTT subtitles
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification: { public.filename-extension: [vtt] }
+          - UTTypeIdentifier: com.utkarsh.subtext.ass
+            UTTypeDescription: Advanced SubStation subtitles
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification: { public.filename-extension: [ass, ssa] }
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.utkarsh.subtext
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: SubtextWidget
+    postCompileScripts:
+      # This project lives under ~/Documents, which iCloud Drive decorates with
+      # extended attributes that codesign refuses. Strip them before signing.
+      - script: /usr/bin/xattr -cr "$TARGET_BUILD_DIR/$WRAPPER_NAME" || true
+        name: Strip extended attributes
+  SubtextWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - SubtextWidget
+      - Shared
+    info:
+      path: SubtextWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Subtext
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.utkarsh.subtext.widget
+        SKIP_INSTALL: true
+        TARGETED_DEVICE_FAMILY: "1"
+    postCompileScripts:
+      - script: /usr/bin/xattr -cr "$TARGET_BUILD_DIR/$WRAPPER_NAME" || true
+        name: Strip extended attributes
